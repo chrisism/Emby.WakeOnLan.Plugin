@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Wake On Lan Configuration</title>
+</head>
+<body>
+    <div data-role="page" id="wakeonlan-config-page" class="page type-interior pluginConfigurationPage" data-require="emby-button,emby-select,emby-checkbox,emby-linkbutton">
+
+        <div data-role="content">
+            <div class="content-primary">
+
+                <form>
+
+                    <div class="inputContainer inputContainer-withDescription">
+                        <label class="inputLabel inputLabelUnfocused" for="wol-mac">Host MAC address:</label>
+                        <input is="emby-input" type="text" id="wol-mac" autocomplete="off" label="Host MAC address" class="emby-input">
+                        <div class="fieldDescription">The mac address of the machine to wake up.</div>
+                    </div>
+
+                    <div class="inputContainer inputContainer-withDescription">
+                        <label class="inputLabel inputLabelUnfocused" for="wol-port">WOL Port:</label>
+                        <input is="emby-input" type="number" id="wol-port" autocomplete="off" label="WOL Port" class="emby-input">
+                        <div class="fieldDescription">Wake On Lan port to use. Default 0.</div>
+                    </div>
+
+                    <br />
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block"><span>Save</span></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            (function () {
+                var pluginId = "2d674448-e7ce-49da-b900-2f5956f4aad0";
+
+                $('#wakeonlan-config-page').on('pageshow', function (event) {
+                    
+                    var page = this;
+                    Dashboard.showLoadingMsg();
+                    
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        page.querySelector('#wol-mac').value = config.HostMacAddress;
+                        page.querySelector('#wol-port').value = config.WakeOnLanPort;
+                        Dashboard.hideLoadingMsg();
+                    });
+                });
+
+                $('#wakeonlan-config-page').off('submit.plugin').on('submit.plugin', function (e) {
+                    Dashboard.showLoadingMsg();
+                    var form = this;
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                        config.HostMacAddress = form.querySelector('#wol-mac').value;
+                        config.WakeOnLanPort = form.querySelector('#wol-port').value;
+
+                        ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
+                    });
+                    return false;
+                });
+            })();
+        </script>
+    </div>
+
+</body>
+</html>
